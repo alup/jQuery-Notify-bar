@@ -12,12 +12,6 @@
 * http://www.dmitri.me/blog/notify-bar
 */
 
-function strncmp(str1, str2, n) {
-  str1 = str1.substring(0, n);
-  str2 = str2.substring(0, n);
-  return ( ( str1 == str2 ) ? 0 : (( str1 > str2 ) ? 1 : -1 ));
-};
-
 var jquery_notifyBar_counter = 0;
 
 /**
