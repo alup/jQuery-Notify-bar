@@ -11,7 +11,15 @@
 * Project home:
 * http://www.dmitri.me/blog/notify-bar
 */
- 
+
+function strncmp(str1, str2, n) {
+  str1 = str1.substring(0, n);
+  str2 = str2.substring(0, n);
+  return ( ( str1 == str2 ) ? 0 : (( str1 > str2 ) ? 1 : -1 ));
+};
+
+var jquery_notifyBar_counter = 0;
+
 /**
 * param Object
 */
@@ -23,16 +31,19 @@ jQuery.notifyBar = function(settings) {
     notifyBarNS.shown = false;
      
     if( !settings) {
-    settings = {};
+      settings = {};
     }
     // HTML inside bar
     notifyBarNS.html = settings.html || "Your message here";
      
-    //How long bar will be delayed, doesn't count animation time.
-    notifyBarNS.delay = settings.delay || 2000;
+    //How long bar will be displayed, doesn't count animation time.
+    notifyBarNS.duration = settings.duration || 2000;
      
     //How long notifyBarNS bar will be slided up and down
-    notifyBarNS.animationSpeed = settings.animationSpeed || 200;
+    notifyBarNS.animationDuration = settings.animationDuration || 200;
+    
+    //Sticky mode: user must click to close
+    notifyBarNS.sticky = settings.sticky || false;
      
     //Use own jquery object usually DIV, or use default
     notifyBarNS.jqObject = settings.jqObject;
@@ -40,58 +51,54 @@ jQuery.notifyBar = function(settings) {
     //Set up own class
     notifyBarNS.cls = settings.cls || "";
     
-    //close button
-    notifyBarNS.close = settings.close || false;
-    
     if( notifyBarNS.jqObject) {
       bar = notifyBarNS.jqObject;
       notifyBarNS.html = bar.html();
     } else {
+      jquery_notifyBar_counter++;
       bar = jQuery("<div></div>")
       .addClass("jquery-notify-bar")
       .addClass(notifyBarNS.cls)
-      .attr("id", "__notifyBar");
+      .attr("id", "__notifyBar_" + jquery_notifyBar_counter);
     }
          
     bar.html(notifyBarNS.html).hide();
     var id = bar.attr("id");
-    switch (notifyBarNS.animationSpeed) {
-      case "slow":
-      asTime = 600;
+    switch (notifyBarNS.animationDuration) {
+    case "slow":
+      animDuration = 600;
       break;
-      case "normal":
-      asTime = 400;
+    case "normal":
+      animDuration = 400;
       break;
-      case "fast":
-      asTime = 200;
+    case "fast":
+      animDuration = 200;
       break;
-      default:
-      asTime = notifyBarNS.animationSpeed;
+    default:
+      animDuration = notifyBarNS.animationDuration;
     }
     if( bar != 'object'); {
       jQuery("body").prepend(bar);
     }
     
-    // Style close button in CSS file
-    if( notifyBarNS.close) {
-      bar.append(jQuery("<a href='#' class='notify-bar-close'>Close [X]</a>"));
-      jQuery(".notify-bar-close").click(function() {
-        if( bar.attr("id") == "__notifyBar") {
-          jQuery("#" + id).slideUp(asTime, function() { jQuery("#" + id).remove() });
-        } else {
-          jQuery("#" + id).slideUp(asTime);
-        }
-        return false;
-      });
-    }
+    jQuery("#" + id).click(function() {
+      if( notifyBarNS.jqObject) {
+        jQuery("#" + id).slideUp(animDuration);
+      } else {
+        jQuery("#" + id).slideUp(animDuration, function() { jQuery("#" + id).remove() });
+      }
+      return false;
+    });
     
-    bar.slideDown(asTime);
-     
-    // If taken from DOM dot not remove just hide
-    if( bar.attr("id") == "__notifyBar") {
-      setTimeout("jQuery('#" + id + "').slideUp(" + asTime +", function() {jQuery('#" + id + "').remove()});", notifyBarNS.delay + asTime);
-    } else {
-      setTimeout("jQuery('#" + id + "').slideUp(" + asTime +", function() {jQuery('#" + id + "')});", notifyBarNS.delay + asTime);
+    bar.slideDown(animDuration);
+    
+    if( notifyBarNS.sticky == false) {
+      // If taken from DOM dot not remove just hide
+      if( notifyBarNS.jqObject) {
+        setTimeout("jQuery('#" + id + "').slideUp(" + animDuration +", function() {jQuery('#" + id + "')});", notifyBarNS.duration + animDuration);
+      } else {
+        setTimeout("jQuery('#" + id + "').slideUp(" + animDuration +", function() {jQuery('#" + id + "').remove()});", notifyBarNS.duration + animDuration);
+      }
     }
 
 })(jQuery) };
