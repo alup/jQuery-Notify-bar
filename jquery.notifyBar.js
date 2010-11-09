@@ -45,6 +45,9 @@ jQuery.notifyBar = function(settings) {
     //Set up own class
     notifyBarNS.cls = settings.cls || "";
     
+    //Set your callback function
+    notifyBarNS.callback = settings.callback || null;
+    
     if( notifyBarNS.jqObject) {
       bar = notifyBarNS.jqObject;
       notifyBarNS.html = bar.html();
@@ -79,7 +82,12 @@ jQuery.notifyBar = function(settings) {
       if( notifyBarNS.jqObject) {
         jQuery("#" + id).slideUp(animDuration);
       } else {
-        jQuery("#" + id).slideUp(animDuration, function() { jQuery("#" + id).remove() });
+        jQuery("#" + id).slideUp(animDuration, function() {
+          jQuery("#" + id).remove();
+          if(notifyBarNS.callback && $.isFunction(notifyBarNS.callback)){
+            notifyBarNS.callback.call();
+          }
+        });
       }
       return false;
     });
@@ -89,9 +97,19 @@ jQuery.notifyBar = function(settings) {
     if( notifyBarNS.sticky == false) {
       // If taken from DOM dot not remove just hide
       if( notifyBarNS.jqObject) {
-        setTimeout("jQuery('#" + id + "').slideUp(" + animDuration +", function() {jQuery('#" + id + "')});", notifyBarNS.duration + animDuration);
+        var callable = "jQuery('#" + id + "').slideUp(" + animDuration +", function() {jQuery('#" + id + "');\
+          if(notifyBarNS.callback && $.isFunction(notifyBarNS.callback)){\
+            notifyBarNS.callback.call();\
+          }\
+        });";
+        setTimeout(callable, notifyBarNS.duration + animDuration);
       } else {
-        setTimeout("jQuery('#" + id + "').slideUp(" + animDuration +", function() {jQuery('#" + id + "').remove()});", notifyBarNS.duration + animDuration);
+        var callable = "jQuery('#" + id + "').slideUp(" + animDuration +", function() {jQuery('#" + id + "').remove();\
+          if(notifyBarNS.callback && $.isFunction(notifyBarNS.callback)){\
+            notifyBarNS.callback.call();\
+          }\
+        });";
+        setTimeout(callable, notifyBarNS.duration + animDuration);
       }
     }
 
